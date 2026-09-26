@@ -30,6 +30,7 @@ python -m venv .venv && .venv/Scripts/activate   # macOS/Linux: source .venv/bin
 pip install -r requirements-dev.txt
 cp .env.example .env                         # set JWT_SECRET
 alembic upgrade head
+python -m app.seeds.master_data              # optional demo master data (dev only)
 uvicorn app.main:app --reload                # API + docs at http://localhost:8000/docs
 
 cd ../frontend
@@ -44,7 +45,7 @@ Tests: `cd backend && python -m pytest` and `cd frontend && npm test`.
 | Module | Owner | Docs |
 |--------|-------|------|
 | Authentication & User Profile | Geeta | [docs/AUTH.md](docs/AUTH.md) |
-| Products & Warehouses | Gautam | – |
+| Products & Warehouse master data | Gautam | [docs/MASTER_DATA.md](docs/MASTER_DATA.md) |
 | Inventory operations (receipts, deliveries, transfers, adjustments) | Ravi Varma | – |
 | Dashboard & Stock Ledger | Maheshwar | – |
 

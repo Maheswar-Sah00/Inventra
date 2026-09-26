@@ -7,7 +7,15 @@ import { LOGIN_PATH, ROLE_LABELS, useAuth } from "../../modules/auth";
  * Sidebar navigation. Each module adds its own entry here (Products, Operations, Move History,
  * Settings...) when its pages exist.
  */
-export const NAV_ITEMS: { to: string; label: string }[] = [{ to: "/dashboard", label: "Dashboard" }];
+export const NAV_ITEMS: { to: string; label: string }[] = [
+  { to: "/dashboard", label: "Dashboard" },
+  { to: "/products", label: "Products" },
+  { to: "/categories", label: "Categories" },
+  { to: "/units", label: "Units of Measure" },
+  { to: "/reorder-rules", label: "Reordering Rules" },
+  { to: "/warehouses", label: "Warehouses" },
+  { to: "/locations", label: "Locations" },
+];
 
 export function AppLayout() {
   const { user, logout } = useAuth();

@@ -3,7 +3,8 @@
 from collections.abc import Iterator
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, MetaData, create_engine
+from sqlalchemy import DateTime, MetaData, create_engine, event
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 from app.core.config import get_settings
@@ -36,6 +37,15 @@ class TimestampMixin:
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False
     )
+
+
+@event.listens_for(Engine, "connect")
+def _enable_sqlite_foreign_keys(dbapi_connection, connection_record) -> None:
+    """SQLite ignores foreign keys unless asked; enforce them like PostgreSQL does."""
+    if type(dbapi_connection).__module__.startswith("sqlite3"):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
 
 
 def _make_engine(url: str):
