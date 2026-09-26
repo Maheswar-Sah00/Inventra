@@ -95,7 +95,18 @@ def on_hand(db: Session, product_id: int, location_id: int) -> Decimal:
 
 
 def on_hand_map(db: Session, positions: Iterable[Position]) -> dict[Position, Decimal]:
-    return {position: on_hand(db, *position) for position in set(positions)}
+    """Current quantities for many positions in one query (missing positions are 0)."""
+    wanted = set(positions)
+    if not wanted:
+        return {}
+    rows = db.execute(
+        select(Stock.product_id, Stock.location_id, Stock.quantity).where(
+            Stock.product_id.in_({product_id for product_id, _ in wanted}),
+            Stock.location_id.in_({location_id for _, location_id in wanted}),
+        )
+    )
+    found = {(product_id, location_id): quantity for product_id, location_id, quantity in rows}
+    return {position: found.get(position, ZERO) for position in wanted}
 
 
 def check_availability(db: Session, requirements: Iterable[tuple[int, int, Decimal]]) -> list[Shortage]:
@@ -103,9 +114,11 @@ def check_availability(db: Session, requirements: Iterable[tuple[int, int, Decim
 
     Not a guarantee: stock is not reserved. Validation re-checks under lock.
     """
+    requirements = list(requirements)
+    stock = on_hand_map(db, [(product_id, location_id) for product_id, location_id, _ in requirements])
     shortages = []
     for product_id, location_id, quantity in requirements:
-        available = on_hand(db, product_id, location_id)
+        available = stock[(product_id, location_id)]
         if available < quantity:
             product = db.get(Product, product_id)
             location = db.get(Location, location_id)
