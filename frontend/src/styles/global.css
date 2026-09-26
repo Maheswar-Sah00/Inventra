@@ -810,3 +810,38 @@ h3 {
     font-size: 1.6rem;
   }
 }
+
+/* ---- Grouped sidebar navigation ---- */
+.nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.6rem;
+}
+
+.nav-section-title {
+  margin: 0.4rem 0.75rem 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.sidebar-nav {
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .nav-section {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 0.25rem;
+  }
+
+  .nav-section-title {
+    width: 100%;
+    margin: 0.25rem 0.5rem 0;
+  }
+}

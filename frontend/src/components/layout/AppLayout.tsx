@@ -4,23 +4,37 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { LOGIN_PATH, ROLE_LABELS, useAuth } from "../../modules/auth";
 
 /**
- * Sidebar navigation. Each module adds its own entry here (Products, Operations, Move History,
- * Settings...) when its pages exist.
+ * Sidebar navigation, grouped as in the project brief. Modules add their pages to a section here.
  */
-export const NAV_ITEMS: { to: string; label: string }[] = [
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/receipts", label: "Receipts" },
-  { to: "/deliveries", label: "Delivery Orders" },
-  { to: "/transfers", label: "Internal Transfers" },
-  { to: "/adjustments", label: "Adjustments" },
-  { to: "/move-history", label: "Move History" },
-  { to: "/stock-availability", label: "Stock" },
-  { to: "/products", label: "Products" },
-  { to: "/categories", label: "Categories" },
-  { to: "/units", label: "Units of Measure" },
-  { to: "/reorder-rules", label: "Reordering Rules" },
-  { to: "/warehouses", label: "Warehouses" },
-  { to: "/locations", label: "Locations" },
+export const NAV_SECTIONS: { title?: string; items: { to: string; label: string }[] }[] = [
+  { items: [{ to: "/dashboard", label: "Dashboard" }] },
+  {
+    title: "Products",
+    items: [
+      { to: "/products", label: "Products" },
+      { to: "/stock-availability", label: "Stock Availability" },
+      { to: "/categories", label: "Categories" },
+      { to: "/units", label: "Units of Measure" },
+      { to: "/reorder-rules", label: "Reordering Rules" },
+    ],
+  },
+  {
+    title: "Operations",
+    items: [
+      { to: "/receipts", label: "Receipts" },
+      { to: "/deliveries", label: "Delivery Orders" },
+      { to: "/transfers", label: "Internal Transfers" },
+      { to: "/adjustments", label: "Inventory Adjustments" },
+      { to: "/move-history", label: "Move History" },
+    ],
+  },
+  {
+    title: "Settings",
+    items: [
+      { to: "/warehouses", label: "Warehouses" },
+      { to: "/locations", label: "Locations" },
+    ],
+  },
 ];
 
 export function AppLayout() {
@@ -39,10 +53,15 @@ export function AppLayout() {
       <aside className="sidebar">
         <div className="brand">StockSense</div>
         <nav className="sidebar-nav" aria-label="Main">
-          {NAV_ITEMS.map((item) => (
-            <NavLink key={item.to} to={item.to} className="nav-link">
-              {item.label}
-            </NavLink>
+          {NAV_SECTIONS.map((section, index) => (
+            <div key={section.title ?? index} className="nav-section">
+              {section.title && <p className="nav-section-title">{section.title}</p>}
+              {section.items.map((item) => (
+                <NavLink key={item.to} to={item.to} className="nav-link">
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
         <div className="profile-menu" aria-label="Profile menu">
