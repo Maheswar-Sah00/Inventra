@@ -89,8 +89,14 @@ npm install
 npm run dev                            # http://localhost:5173, forwards /api to the backend
 ```
 
-Open http://localhost:5173 and sign up. Choose **Inventory Manager** to be able to create master data;
-every signed-in user can run inventory operations.
+Open http://localhost:5173 and sign in with the demo account (created by the seed script above; also shown
+at the bottom of the login page in development):
+
+- **Email:** `admin@stocksense.com`
+- **Password:** `Admin1234`
+
+Or sign up. Choose **Inventory Manager** to be able to create master data; every signed-in user can run
+inventory operations.
 
 ### Production build
 
@@ -136,7 +142,8 @@ alembic revision --autogenerate -m "describe change"   # after changing models (
 
 ## Demo data
 
-`python -m app.seeds.master_data` adds one category (Raw Materials), two units (Kilogram, Piece) and a
+`python -m app.seeds.master_data` adds a demo Inventory Manager login (`admin@stocksense.com` /
+`Admin1234`), one category (Raw Materials), two units (Kilogram, Piece) and a
 Main Warehouse (`DEMO-MAIN`) with Rack A and Rack B. All of it is labelled as demo data. The script is
 safe to run repeatedly and refuses to run with `ENVIRONMENT=production`. Products and stock are created
 through the app.
@@ -152,8 +159,8 @@ A typical walkthrough:
 ## Tests
 
 ```bash
-cd backend && python -m pytest      # 258 tests; in-memory SQLite per test
-cd frontend && npm test             # 61 tests
+cd backend && python -m pytest      # 259 tests; in-memory SQLite per test
+cd frontend && npm test             # 65 tests
 ```
 
 To run the backend suite against PostgreSQL (the target database), point it at an empty database.
@@ -188,6 +195,20 @@ nothing), all or nothing for multi-line documents, and safe under concurrent req
 | Products & Warehouse master data | Gautam | [docs/MASTER_DATA.md](docs/MASTER_DATA.md) |
 | Inventory operations & stock engine | Ravi Varma | [docs/INVENTORY.md](docs/INVENTORY.md) |
 | Dashboard, stock availability, move history & integration | Maheshwar | [docs/DASHBOARD.md](docs/DASHBOARD.md) |
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| First page load after `npm run dev` is blank for a few seconds | Vite compiles on the first request; wait or reload. |
+| Every API call fails with "The server ran into a problem" (dev server) or "The server is not reachable right now" (behind a reverse proxy) | The backend is not running where the frontend forwards `/api`. Start `uvicorn` (port 8000), or set `VITE_DEV_API_PROXY_TARGET`. |
+| Backend exits with `JWT_SECRET must be set ...` | `ENVIRONMENT=production` requires a random `JWT_SECRET` of 32+ characters and `EMAIL_BACKEND=smtp`. |
+| `connection refused` on `alembic upgrade head` | The database is not reachable; check `DATABASE_URL` and that `docker compose up -d db` is running. |
+| `docker compose up` fails with "port is already allocated" | Another PostgreSQL is running locally; stop it or map a different host port in `docker-compose.yml` and update `DATABASE_URL`. |
+| Password reset: where is the code? | With `EMAIL_BACKEND=console` (development) the code is printed in the backend log (`[DEV EMAIL - not sent] ... code is: 123456`). |
+| "Too many requests" on login | The per-IP limit (`AUTH_RATE_LIMIT_PER_MINUTE`, default 20/min) was hit; wait a minute. |
+| Start over with an empty database | SQLite: delete the `.db` file. PostgreSQL: `alembic downgrade base && alembic upgrade head`. Then re-run the seed. |
+| Signed out unexpectedly | Tokens expire after `JWT_EXPIRE_MINUTES` (default 60) and are revoked on logout or password reset; sign in again. |
 
 ## Known limitations
 
