@@ -16,14 +16,23 @@ MASTER_DATA_TABLES = {"categories", "units_of_measure", "warehouses", "locations
 
 
 def test_seed_creates_demo_data_once(db):
-    assert master_data.seed(db) == {"categories": 1, "units": 2, "warehouses": 1, "locations": 2}
-    assert master_data.seed(db) == {"categories": 0, "units": 0, "warehouses": 0, "locations": 0}
+    assert master_data.seed(db) == {"users": 1, "categories": 1, "units": 2, "warehouses": 1, "locations": 2}
+    assert master_data.seed(db) == {"users": 0, "categories": 0, "units": 0, "warehouses": 0, "locations": 0}
 
     warehouse = db.scalar(select(Warehouse))
     assert warehouse.name == "Main Warehouse" and "Demo" in warehouse.address
     assert {loc.name for loc in db.scalars(select(Location))} == {"Rack A", "Rack B"}
     assert {u.symbol for u in db.scalars(select(UnitOfMeasure))} == {"kg", "pc"}
     assert db.scalar(select(func.count()).select_from(Category)) == 1
+
+
+def test_seeded_demo_user_can_log_in(db, client):
+    master_data.seed(db)
+    response = client.post(
+        "/api/auth/login", json={"email": master_data.DEMO_EMAIL, "password": master_data.DEMO_PASSWORD}
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["user"]["role"] == "INVENTORY_MANAGER"
 
 
 def test_seed_refuses_to_run_in_production(monkeypatch, capsys):

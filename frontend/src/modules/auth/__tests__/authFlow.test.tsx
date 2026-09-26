@@ -109,6 +109,16 @@ describe("login", () => {
     expect(screen.getByText("Password is required")).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it("fills the form with the demo account shown in development", async () => {
+    mockApi({});
+    renderApp("/login");
+    const user = userEvent.setup();
+    expect(await screen.findByText("admin@stocksense.com")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Use demo account" }));
+    expect(screen.getByLabelText("Email")).toHaveValue("admin@stocksense.com");
+    expect(screen.getByLabelText("Password")).toHaveValue("Admin1234");
+  });
 });
 
 describe("logout", () => {

@@ -11,6 +11,10 @@ import { ApiError } from "../services/apiClient";
 
 type LoginLocationState = { from?: Location; message?: string } | null;
 
+// Created by `python -m app.seeds.master_data` (backend/app/seeds/master_data.py); keep them in sync.
+const DEMO_EMAIL = "admin@stocksense.com";
+const DEMO_PASSWORD = "Admin1234";
+
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -80,6 +84,28 @@ export function LoginPage() {
           Sign in
         </Button>
       </form>
+      {import.meta.env.DEV && (
+        <div className="demo-login">
+          <p>
+            <strong>Demo login</strong>
+            <br />
+            Email: <code>{DEMO_EMAIL}</code>
+            <br />
+            Password: <code>{DEMO_PASSWORD}</code>
+          </p>
+          <button
+            type="button"
+            className="link-button"
+            onClick={() => {
+              setEmail(DEMO_EMAIL);
+              setPassword(DEMO_PASSWORD);
+              setErrors({});
+            }}
+          >
+            Use demo account
+          </button>
+        </div>
+      )}
     </AuthLayout>
   );
 }
