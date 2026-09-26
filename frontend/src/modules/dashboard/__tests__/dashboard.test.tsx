@@ -189,7 +189,8 @@ describe("dashboard", () => {
     renderApp("/dashboard?warehouse_id=9999");
     const u = userEvent.setup();
     const kpiError = await screen.findByText("Invalid filter: Warehouse not found");
-    expect(await screen.findByText("Internal Server Error")).toBeInTheDocument();
+    expect(await screen.findByText("The server ran into a problem. Please try again.")).toBeInTheDocument();
+    expect(screen.queryByText("Internal Server Error")).not.toBeInTheDocument();
     await u.click(within(kpiError.closest(".error-state") as HTMLElement).getByRole("button", { name: "Retry" }));
     expect(await screen.findByLabelText("Key figures")).toBeInTheDocument();
     expect(callsTo(fetchMock, "GET", "/dashboard/summary")).toHaveLength(2);
@@ -287,10 +288,10 @@ describe("move history", () => {
     mockApi({
       ...signedInAs("WAREHOUSE_STAFF"),
       ...lookups,
-      "GET /stock-movements": () => (fail ? { status: 500, body: { detail: "Database unavailable" } } : { status: 200, body: page([movement(1)]) }),
+      "GET /stock-movements": () => (fail ? { status: 503, body: { detail: "Database unavailable" } } : { status: 200, body: page([movement(1)]) }),
     });
     renderApp("/move-history");
-    expect(await screen.findByText("Database unavailable")).toBeInTheDocument();
+    expect(await screen.findByText("The server is not reachable right now. Please try again in a moment.")).toBeInTheDocument();
     fail = false;
     await userEvent.setup().click(screen.getByRole("button", { name: "Retry" }));
     expect(await screen.findByRole("link", { name: "REC-000001" })).toBeInTheDocument();

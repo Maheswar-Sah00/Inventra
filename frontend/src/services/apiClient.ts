@@ -43,6 +43,11 @@ function cleanMessage(msg: string) {
 }
 
 function parseError(status: number, payload: unknown): ApiError {
+  // Never surface server internals (e.g. "Internal Server Error", stack traces) to users.
+  if (status === 502 || status === 503 || status === 504) {
+    return new ApiError("The server is not reachable right now. Please try again in a moment.", status);
+  }
+  if (status >= 500) return new ApiError("The server ran into a problem. Please try again.", status);
   const detail = (payload as { detail?: unknown } | null)?.detail;
   if (typeof detail === "string") return new ApiError(detail, status);
   if (Array.isArray(detail)) {
