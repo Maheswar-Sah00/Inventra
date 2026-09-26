@@ -252,7 +252,7 @@ await apiRequest<Product[]>("/products");          // bearer token attached; a 4
 
 - Put new pages inside the `<ProtectedRoute>` / `<AppLayout>` block in `src/App.tsx`. Use
   `<ProtectedRoute roles={["INVENTORY_MANAGER"]} />` to limit a route to certain roles.
-- Add sidebar entries to `NAV_ITEMS` in `src/components/layout/AppLayout.tsx`.
+- Add sidebar entries to a section of `NAV_SECTIONS` in `src/components/layout/AppLayout.tsx`.
 - `/dashboard` is where users land after login (the Dashboard module's page, see
   [DASHBOARD.md](DASHBOARD.md)).
 

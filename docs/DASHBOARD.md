@@ -61,7 +61,8 @@ otherwise                                                 → IN_STOCK
   never received stock therefore shows as out of stock at 0.
 - **Low stock needs a reorder rule.** A product without rules can only be `OUT_OF_STOCK` (at a location
   it was emptied from) or `IN_STOCK`.
-- **"At or below minimum"** matches the reorder-rule semantics and `/api/stock/reorder-status`.
+- **"At or below minimum"** matches the reorder-rule semantics. This is the only implementation of
+  the rule; the inventory module's former `/api/stock/reorder-status` was removed during integration.
 - **Alerts are in-app only:** the dashboard's *Stock alerts* panel plus status badges. There is no
   email, SMS or push. Status is always written out ("Low stock"), never shown by colour alone.
 
@@ -99,8 +100,8 @@ Unknown warehouse, location or category IDs, or a location outside the selected 
 - **Filters:** `warehouse_id`, `location_id`, `category_id`, `product_id`, `q` (name/SKU), and `status`
   (repeatable: `IN_STOCK`, `LOW_STOCK`, `OUT_OF_STOCK`). Paginated with `limit`/`offset`, returning
   `{items, total, limit, offset}`.
-- The page is read-only. The sidebar **Stock** entry now opens this page. The inventory module's simpler
-  `/stock` page still exists at its URL.
+- The page is read-only. It is the single stock page: the inventory module's earlier `/stock` page was
+  removed during integration, and `/stock` now redirects here.
 
 ## Move History / Stock Ledger (page `/move-history`)
 
@@ -151,7 +152,7 @@ were not added: the existing ledger endpoint with filters covers them.
 |------|--------|-----|
 | `backend/app/main.py` | register the dashboard router | documented extension point |
 | `frontend/src/App.tsx` | `/dashboard` → `DashboardPage`; add `/stock-availability`, `/move-history`; removed the auth module's `DashboardPlaceholderPage` | the placeholder was meant to be replaced |
-| `AppLayout.tsx` `NAV_ITEMS` | add *Move History*; *Stock* → `/stock-availability` | documented extension point |
+| `AppLayout.tsx` navigation | add *Move History* and *Stock Availability*; grouped into sections during integration (`NAV_SECTIONS`) | documented extension point |
 | `components/ui/Pagination.tsx` | add "Page X of Y" | brief asks for a current-page indicator; applies to every list |
 | `pages/operations/OperationListPage.tsx` | initial `status`/`warehouse_id` from the URL | so dashboard links open pre-filtered lists |
 | `docs/AUTH.md` | the placeholder mention now points here | file removed |

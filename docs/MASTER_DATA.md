@@ -34,7 +34,7 @@ frontend/src/
 
 Changes to shared files are limited to the extension points the auth module documented:
 - Router registration in `app/main.py` and model imports in `app/models.py`.
-- Routes in `src/App.tsx` and sidebar entries in `NAV_ITEMS`.
+- Routes in `src/App.tsx` and sidebar entries in `NAV_SECTIONS` (originally `NAV_ITEMS`).
 - A new "Master data" section appended to `global.css`.
 - A listener in `app/core/database.py` that turns on foreign-key enforcement for SQLite connections, so
   local development and tests enforce the same delete rules as PostgreSQL.

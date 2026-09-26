@@ -18,7 +18,7 @@ backend/app/
 │   ├── documents.py   shared document lifecycle: statuses, references, compare-and-set transitions, list filters
 │   ├── queries.py     read-only stock, per-product availability, reorder status, ledger queries
 │   ├── schemas.py     shared response shapes (UserRef, LineOut, StockOut, MovementOut, …)
-│   └── routes.py      /api/stock, /api/stock/products/{id}, /api/stock/reorder-status, /api/stock-movements
+│   └── routes.py      /api/stock, /api/stock/products/{id}, /api/stock-movements
 ├── receipts/          Receipt + ReceiptItem              → /api/receipts
 ├── deliveries/        Delivery + DeliveryItem (pick/pack) → /api/deliveries
 ├── transfers/         Transfer + TransferItem            → /api/transfers
@@ -26,7 +26,7 @@ backend/app/
 
 frontend/src/
 ├── modules/inventory/   api.ts, types.ts, operations.ts (per-operation config), DocumentStatusBadge, ProductStockPanel
-└── pages/operations/    OperationListPage / OperationFormPage / OperationDetailPage (shared by all four), StockPage
+└── pages/operations/    OperationListPage / OperationFormPage / OperationDetailPage (shared by all four)
 ```
 
 **One authoritative source.** Only `app/inventory/services.py` writes to `stock`, and every change it
@@ -35,7 +35,7 @@ lines), never a running quantity.
 
 Integration points in teammates' code, all at the places they documented for extension:
 - routers in `app/main.py`, models in `app/models.py`
-- routes in `src/App.tsx`, sidebar `NAV_ITEMS`
+- routes in `src/App.tsx`, sidebar `NAV_SECTIONS`
 - the stock panel slot in `ProductDetailPage.tsx`, plus its test mock
 - a new section in `global.css`
 
@@ -228,7 +228,6 @@ Common document fields: `id`, `reference`, `status`, `scheduled_date`, `notes`, 
 |--------|------|---------|
 | GET | `/stock` | positions `{id, product_id, product{…, category, unit_of_measure}, location_id, location{…, warehouse}, quantity, updated_at}`. Filters: `product_id`, `location_id`, `warehouse_id`, `category_id`, `q` (name/SKU), `include_empty` |
 | GET | `/stock/products/{product_id}` | `{product, total_quantity, locations[{location, quantity}]}`; optional `warehouse_id` |
-| GET | `/stock/reorder-status` | per active reorder rule: `{rule_id, product, location, minimum_quantity, target_quantity, on_hand, needs_reorder, suggested_quantity}`. Filters: `product_id`, `location_id`, `warehouse_id`, `needs_reorder` |
 | GET | `/stock-movements` | ledger `{id, movement_type, product, quantity, source_location, destination_location, reference_type, reference_id, reference_number, performed_by, created_at}`, newest first. Filters: `product_id`, `location_id`/`warehouse_id` (either side), `category_id`, `movement_type` (repeatable), `reference_type`, `reference_id`, `date_from`, `date_to` (UTC dates, inclusive), `q` (product or reference) |
 
 All lists return `{items, total, limit, offset}`. Quantities are JSON numbers.
@@ -258,7 +257,7 @@ Dashboard KPIs:
 | Need | Call |
 |------|------|
 | Total products in stock | `GET /api/stock` (positions with quantity > 0; distinct `product_id`s), or `GET /api/stock/products/{id}` per product |
-| Low stock / out of stock | `GET /api/stock/reorder-status?needs_reorder=true` (rule-based). Products with no stock anywhere have no `/api/stock` rows. |
+| Low stock / out of stock | `GET /api/stock-availability?status=LOW_STOCK&status=OUT_OF_STOCK` (dashboard module; see [DASHBOARD.md](DASHBOARD.md)) |
 | Pending receipts | `GET /api/receipts?status=DRAFT&status=WAITING&status=READY&limit=1` → `total` |
 | Pending deliveries | same on `/api/deliveries` |
 | Internal transfers scheduled | same on `/api/transfers` (`scheduled_date` available per document) |
