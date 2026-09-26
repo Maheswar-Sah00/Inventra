@@ -3,7 +3,9 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
 import { DEFAULT_AUTHENTICATED_PATH, ProtectedRoute, PublicOnlyRoute } from "./modules/auth";
 import { OPERATIONS } from "./modules/inventory/operations";
-import { DashboardPlaceholderPage } from "./pages/DashboardPlaceholderPage";
+import { DashboardPage } from "./pages/dashboard/DashboardPage";
+import { MoveHistoryPage } from "./pages/dashboard/MoveHistoryPage";
+import { StockAvailabilityPage } from "./pages/dashboard/StockAvailabilityPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { LoginPage } from "./pages/LoginPage";
 import { CategoriesPage } from "./pages/master-data/CategoriesPage";
@@ -40,7 +42,9 @@ export function AppRoutes() {
       {/* Requires a signed-in user. Add module pages inside this block. */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="/dashboard" element={<DashboardPlaceholderPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/stock-availability" element={<StockAvailabilityPage />} />
+          <Route path="/move-history" element={<MoveHistoryPage />} />
           <Route path="/profile" element={<ProfilePage />} />
 
           {/* Master data (products & warehouses) */}

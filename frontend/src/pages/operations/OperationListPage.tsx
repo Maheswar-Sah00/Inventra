@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { Alert } from "../../components/ui/Alert";
 import { Button } from "../../components/ui/Button";
@@ -19,9 +19,11 @@ const PENDING = "PENDING";
 export function OperationListPage({ config }: { config: OperationConfig }) {
   const navigate = useNavigate();
   const api = operationApi(config.kind);
-  const [status, setStatus] = useState<string>(PENDING);
+  const [searchParams] = useSearchParams();
+  // Initial filters may come from the URL (e.g. dashboard links: ?status=READY&warehouse_id=2).
+  const [status, setStatus] = useState<string>(searchParams.get("status") ?? PENDING);
   const [search, setSearch] = useState("");
-  const [warehouseId, setWarehouseId] = useState("");
+  const [warehouseId, setWarehouseId] = useState(searchParams.get("warehouse_id") ?? "");
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [offset, setOffset] = useState(0);
   const q = useDebouncedValue(search.trim());

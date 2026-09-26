@@ -659,3 +659,154 @@ h3 {
 .form-card h2 {
   margin-top: 0.5rem;
 }
+
+/* ---- Dashboard, stock availability, move history ---- */
+.filter-bar {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+}
+
+.filter-bar .btn-link {
+  width: auto;
+  margin: 0 0 0.2rem;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem 1.1rem;
+  color: inherit;
+  text-decoration: none;
+  min-height: 118px;
+}
+
+.kpi-link:hover,
+.kpi-link:focus-visible {
+  border-color: var(--color-primary);
+}
+
+.kpi-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.kpi-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.kpi-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.kpi-loading {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--color-muted);
+  padding: 0.6rem 0;
+}
+
+.kpi-muted {
+  color: var(--color-muted);
+}
+
+.kpi-detail {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.dashboard-grid .card {
+  margin-top: 0;
+  min-width: 0;
+}
+
+.section-header.compact {
+  margin: 0 0 0.75rem;
+}
+
+.alert-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.alert-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.6rem;
+}
+
+.stock-in-stock {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.stock-low-stock {
+  background: #fffaeb;
+  color: #b54708;
+}
+
+.stock-out-of-stock {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.empty-state {
+  padding: 0.75rem 0.9rem;
+  margin: 0;
+}
+
+.error-state {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.error-state .btn {
+  width: auto;
+}
+
+.filter-chip {
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+@media (max-width: 600px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kpi-value {
+    font-size: 1.6rem;
+  }
+}

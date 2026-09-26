@@ -31,7 +31,7 @@ frontend/src/
 ├── services/apiClient.ts  fetch wrapper: base URL, bearer token, error parsing, 401 handling
 ├── modules/auth/          AuthProvider/useAuth, route guards, auth API calls, validation
 ├── components/            layout (AppLayout sidebar with Profile menu, AuthLayout) and UI primitives
-└── pages/                 Login, Signup, ForgotPassword, ResetPassword, Profile (+ Dashboard placeholder)
+└── pages/                 Login, Signup, ForgotPassword, ResetPassword, Profile
 ```
 
 **Strategy:** stateless JWT bearer tokens (HS256, `JWT_EXPIRE_MINUTES`, default 60) sent in the
@@ -253,8 +253,8 @@ await apiRequest<Product[]>("/products");          // bearer token attached; a 4
 - Put new pages inside the `<ProtectedRoute>` / `<AppLayout>` block in `src/App.tsx`. Use
   `<ProtectedRoute roles={["INVENTORY_MANAGER"]} />` to limit a route to certain roles.
 - Add sidebar entries to `NAV_ITEMS` in `src/components/layout/AppLayout.tsx`.
-- `/dashboard` is where users land after login. `src/pages/DashboardPlaceholderPage.tsx` is a
-  placeholder for the Dashboard module to replace.
+- `/dashboard` is where users land after login (the Dashboard module's page, see
+  [DASHBOARD.md](DASHBOARD.md)).
 
 ## Known limitations
 

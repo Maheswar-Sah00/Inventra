@@ -9,6 +9,7 @@ from app.adjustments.routes import router as adjustments_router
 from app.auth.routes import router as auth_router
 from app.categories.routes import router as categories_router
 from app.core.config import get_settings
+from app.dashboard.routes import router as dashboard_router
 from app.deliveries.routes import router as deliveries_router
 from app.inventory.routes import router as inventory_router
 from app.locations.routes import router as locations_router
@@ -55,6 +56,8 @@ def create_app() -> FastAPI:
     # Inventory operations & stock engine
     for router in (inventory_router, receipts_router, deliveries_router, transfers_router, adjustments_router):
         app.include_router(router, prefix=settings.API_PREFIX)
+    # Dashboard & visibility (read-only)
+    app.include_router(dashboard_router, prefix=settings.API_PREFIX)
     return app
 
 
