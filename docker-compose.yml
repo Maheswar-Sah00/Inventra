@@ -1,0 +1,15 @@
+# Local development database. Credentials match backend/.env.example; not for production use.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: stocksense
+      POSTGRES_PASSWORD: stocksense
+      POSTGRES_DB: stocksense
+    ports:
+      - "5432:5432"
+    volumes:
+      - stocksense-db:/var/lib/postgresql/data
+
+volumes:
+  stocksense-db:
