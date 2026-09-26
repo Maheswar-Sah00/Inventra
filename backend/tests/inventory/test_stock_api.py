@@ -61,26 +61,6 @@ def test_product_stock_breakdown(inv, world):
     assert inv.get("/stock/products/9999").status_code == 404
 
 
-def test_reorder_status(inv, md, world, client, manager):
-    low = md.rule(product_id=world.steel["id"], location_id=world.rack_a["id"], minimum_quantity=10, target_quantity=50)
-    ok = md.rule(product_id=world.chair["id"], location_id=world.rack_a["id"], minimum_quantity=1, target_quantity=5)
-    empty = md.rule(product_id=world.steel["id"], location_id=world.rack_c["id"], minimum_quantity=0, target_quantity=8)
-    inactive = md.rule(product_id=world.chair["id"], location_id=world.rack_b["id"], minimum_quantity=100, target_quantity=100)
-    client.patch(f"/api/reorder-rules/{inactive['id']}", headers=manager, json={"is_active": False})
-    inv.receive(world.steel["id"], world.rack_a["id"], 5)
-    inv.receive(world.chair["id"], world.rack_a["id"], 3)
-
-    rows = {r["rule_id"]: r for r in inv.get("/stock/reorder-status").json()["items"]}
-    assert set(rows) == {low["id"], ok["id"], empty["id"]}
-    assert (rows[low["id"]]["on_hand"], rows[low["id"]]["needs_reorder"], rows[low["id"]]["suggested_quantity"]) == (5, True, 45)
-    assert (rows[ok["id"]]["needs_reorder"], rows[ok["id"]]["suggested_quantity"]) == (False, 0)
-    assert (rows[empty["id"]]["on_hand"], rows[empty["id"]]["needs_reorder"], rows[empty["id"]]["suggested_quantity"]) == (0, True, 8)
-
-    flagged = inv.get("/stock/reorder-status", needs_reorder=True).json()
-    assert flagged["total"] == 2 and {r["rule_id"] for r in flagged["items"]} == {low["id"], empty["id"]}
-    assert inv.get("/stock/reorder-status", warehouse_id=world.second["id"]).json()["items"][0]["rule_id"] == empty["id"]
-
-
 def test_movement_ledger_filters(inv, world):
     receipt = inv.receive(world.steel["id"], world.rack_a["id"], 10)
     transfer = inv.create(

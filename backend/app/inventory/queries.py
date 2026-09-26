@@ -1,9 +1,12 @@
-"""Read-only stock queries: current stock, per-product availability, reorder status and the ledger."""
+"""Read-only stock queries: current stock, per-product availability and the ledger.
+
+Stock status (in/low/out of stock against reorder rules) lives in app.dashboard.services.
+"""
 
 from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, aliased
 
 from app.core.crud import get_or_404
@@ -13,12 +16,10 @@ from app.inventory.schemas import (
     LocationQuantity,
     MovementOut,
     ProductStockOut,
-    ReorderStatusOut,
     StockOut,
 )
 from app.locations.models import Location
 from app.products.models import Product
-from app.reorder_rules.models import ReorderRule
 from app.warehouses.models import Warehouse
 
 ZERO = Decimal("0")
@@ -76,60 +77,6 @@ def product_stock(db: Session, product_id: int, warehouse_id: int | None = None)
     )
 
 
-def reorder_status(
-    db: Session,
-    page: PageParams,
-    *,
-    product_id: int | None,
-    location_id: int | None,
-    warehouse_id: int | None,
-    needs_reorder: bool | None,
-) -> Page:
-    """Active reorder rules (with active product and usable location) against current stock."""
-    on_hand = func.coalesce(Stock.quantity, 0)
-    statement = (
-        select(ReorderRule, on_hand.label("on_hand"))
-        .join(Product, Product.id == ReorderRule.product_id)
-        .join(Location, Location.id == ReorderRule.location_id)
-        .join(Warehouse, Warehouse.id == Location.warehouse_id)
-        .outerjoin(
-            Stock, and_(Stock.product_id == ReorderRule.product_id, Stock.location_id == ReorderRule.location_id)
-        )
-        .where(ReorderRule.is_active, Product.is_active, Location.is_active, Warehouse.is_active)
-    )
-    if product_id is not None:
-        statement = statement.where(ReorderRule.product_id == product_id)
-    if location_id is not None:
-        statement = statement.where(ReorderRule.location_id == location_id)
-    if warehouse_id is not None:
-        statement = statement.where(Location.warehouse_id == warehouse_id)
-    if needs_reorder is not None:
-        low = on_hand <= ReorderRule.minimum_quantity
-        statement = statement.where(low if needs_reorder else ~low)
-
-    total = db.scalar(select(func.count()).select_from(statement.subquery())) or 0
-    rows = db.execute(
-        statement.order_by(Product.name, Warehouse.name, Location.name, ReorderRule.id)
-        .limit(page.limit)
-        .offset(page.offset)
-    ).unique()
-    items = []
-    for rule, quantity in rows:
-        quantity = Decimal(str(quantity)).quantize(Decimal("0.001"))
-        low = quantity <= rule.minimum_quantity
-        items.append(
-            ReorderStatusOut(
-                rule_id=rule.id,
-                product=rule.product,
-                location=rule.location,
-                minimum_quantity=rule.minimum_quantity,
-                target_quantity=rule.target_quantity,
-                on_hand=quantity,
-                needs_reorder=low,
-                suggested_quantity=max(rule.target_quantity - quantity, ZERO) if low else ZERO,
-            )
-        )
-    return Page(items=items, total=total, limit=page.limit, offset=page.offset)
 
 
 def list_movements(

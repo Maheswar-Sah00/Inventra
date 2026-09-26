@@ -21,7 +21,6 @@ import { NotFoundPage } from "./pages/NotFoundPage";
 import { OperationDetailPage } from "./pages/operations/OperationDetailPage";
 import { OperationFormPage } from "./pages/operations/OperationFormPage";
 import { OperationListPage } from "./pages/operations/OperationListPage";
-import { StockPage } from "./pages/operations/StockPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { SignupPage } from "./pages/SignupPage";
@@ -62,7 +61,7 @@ export function AppRoutes() {
           </Route>
 
           {/* Inventory operations (open to every signed-in user). key= remounts pages per operation. */}
-          <Route path="/stock" element={<StockPage />} />
+          <Route path="/stock" element={<Navigate to="/stock-availability" replace />} />
           {Object.values(OPERATIONS).map((config) => [
             <Route key={`${config.kind}-list`} path={`/${config.kind}`} element={<OperationListPage key={config.kind} config={config} />} />,
             <Route key={`${config.kind}-new`} path={`/${config.kind}/new`} element={<OperationFormPage key={`${config.kind}-new`} config={config} />} />,

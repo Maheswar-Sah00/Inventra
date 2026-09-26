@@ -9,7 +9,7 @@ from app.core.database import get_db
 from app.core.pagination import Page, PageParamsDep
 from app.inventory import queries
 from app.inventory.models import MovementType
-from app.inventory.schemas import MovementOut, ProductStockOut, ReorderStatusOut, StockOut
+from app.inventory.schemas import MovementOut, ProductStockOut, StockOut
 
 # Read-only. Stock changes only through receipts, deliveries, transfers and adjustments.
 router = APIRouter(tags=["stock"], dependencies=[Depends(get_current_user)])
@@ -38,21 +38,6 @@ def list_stock(
         category_id=category_id,
         q=q,
         include_empty=include_empty,
-    )
-
-
-@router.get("/stock/reorder-status", response_model=Page[ReorderStatusOut])
-def reorder_status(
-    db: DbSession,
-    page: PageParamsDep,
-    product_id: int | None = None,
-    location_id: int | None = None,
-    warehouse_id: int | None = None,
-    needs_reorder: bool | None = None,
-):
-    """Active reorder rules compared with current stock (on_hand <= minimum means reorder)."""
-    return queries.reorder_status(
-        db, page, product_id=product_id, location_id=location_id, warehouse_id=warehouse_id, needs_reorder=needs_reorder
     )
 
 

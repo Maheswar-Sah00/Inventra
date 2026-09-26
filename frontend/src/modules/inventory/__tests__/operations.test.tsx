@@ -236,11 +236,15 @@ describe("transfers and adjustments", () => {
 });
 
 describe("stock", () => {
-  it("lists stock positions", async () => {
-    mockApi({ ...signedInAs("WAREHOUSE_STAFF"), ...lookups, "GET /stock": () => ({ status: 200, body: page(stockAt(75)) }) });
+  it("sends the old /stock URL to Stock Availability", async () => {
+    mockApi({
+      ...signedInAs("WAREHOUSE_STAFF"),
+      ...lookups,
+      "GET /categories": () => ({ status: 200, body: page([]) }),
+      "GET /stock-availability": () => ({ status: 200, body: page([]) }),
+    });
     renderApp("/stock");
-    expect(await screen.findByRole("link", { name: "Steel Rods" })).toBeInTheDocument();
-    expect(screen.getByText("75 pc")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Stock Availability" })).toBeInTheDocument();
   });
 
   it("shows stock by location on the product page", async () => {

@@ -131,18 +131,6 @@ class ProductStockOut(BaseModel):
     locations: list[LocationQuantity]
 
 
-class ReorderStatusOut(BaseModel):
-    rule_id: int
-    product: InventoryProductRef
-    location: LocationRef
-    minimum_quantity: Quantity
-    target_quantity: Quantity
-    on_hand: Quantity
-    needs_reorder: bool
-    # target - on_hand when reordering is needed, otherwise 0.
-    suggested_quantity: Quantity
-
-
 class MovementOut(ORMModel):
     id: int
     movement_type: MovementType
