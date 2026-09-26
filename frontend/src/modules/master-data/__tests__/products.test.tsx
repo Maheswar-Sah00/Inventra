@@ -76,6 +76,7 @@ describe("product form", () => {
       ...lookups,
       "POST /products": () => ({ status: 201, body: { ...steelRods, initial_stock: 40, initial_location_id: 10, initial_location: rackA } }),
       "GET /products/100": () => ({ status: 200, body: { ...steelRods, initial_stock: 40, initial_location_id: 10, initial_location: rackA } }),
+      "GET /stock/products/100": () => ({ status: 200, body: { product: steelRods, total_quantity: 0, locations: [] } }),
       "GET /reorder-rules": () => ({ status: 200, body: page([]) }),
     });
     renderApp("/products/new");
@@ -137,6 +138,7 @@ describe("product form", () => {
       ...lookups,
       "GET /products/100": () => ({ status: 200, body: steelRods }),
       "PATCH /products/100": (_, body) => ({ status: 200, body: { ...steelRods, ...(body as object) } }),
+      "GET /stock/products/100": () => ({ status: 200, body: { product: steelRods, total_quantity: 0, locations: [] } }),
       "GET /reorder-rules": () => ({ status: 200, body: page([]) }),
     });
     renderApp("/products/100/edit");
@@ -158,6 +160,7 @@ describe("product detail", () => {
     mockApi({
       ...signedInAs("WAREHOUSE_STAFF"),
       "GET /products/100": () => ({ status: 200, body: steelRods }),
+      "GET /stock/products/100": () => ({ status: 200, body: { product: steelRods, total_quantity: 0, locations: [] } }),
       "GET /reorder-rules": (url) => {
         expect(url.searchParams.get("product_id")).toBe("100");
         return {

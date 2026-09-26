@@ -46,7 +46,7 @@ Tests: `cd backend && python -m pytest` and `cd frontend && npm test`.
 |--------|-------|------|
 | Authentication & User Profile | Geeta | [docs/AUTH.md](docs/AUTH.md) |
 | Products & Warehouse master data | Gautam | [docs/MASTER_DATA.md](docs/MASTER_DATA.md) |
-| Inventory operations (receipts, deliveries, transfers, adjustments) | Ravi Varma | – |
+| Inventory operations & stock engine (receipts, deliveries, transfers, adjustments, stock ledger data) | Ravi Varma | [docs/INVENTORY.md](docs/INVENTORY.md) |
 | Dashboard & Stock Ledger | Maheshwar | – |
 
 To protect an API route or a page with authentication, see

@@ -6,6 +6,7 @@ import { Button } from "../../components/ui/Button";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { useAuth } from "../../modules/auth";
+import { ProductStockPanel } from "../../modules/inventory/ProductStockPanel";
 import { productsApi, reorderRulesApi } from "../../modules/master-data/api";
 import { locationLabel, type Product, type ReorderRule } from "../../modules/master-data/types";
 import { ApiError } from "../../services/apiClient";
@@ -106,7 +107,7 @@ export function ProductDetailPage() {
         </dl>
       </div>
 
-      {/* Stock on hand per location is owned by the inventory module and can be shown here. */}
+      <ProductStockPanel productId={product.id} />
 
       <div className="section-header">
         <h2>Reordering rules</h2>

@@ -9,6 +9,11 @@ import { LOGIN_PATH, ROLE_LABELS, useAuth } from "../../modules/auth";
  */
 export const NAV_ITEMS: { to: string; label: string }[] = [
   { to: "/dashboard", label: "Dashboard" },
+  { to: "/receipts", label: "Receipts" },
+  { to: "/deliveries", label: "Delivery Orders" },
+  { to: "/transfers", label: "Internal Transfers" },
+  { to: "/adjustments", label: "Adjustments" },
+  { to: "/stock", label: "Stock" },
   { to: "/products", label: "Products" },
   { to: "/categories", label: "Categories" },
   { to: "/units", label: "Units of Measure" },

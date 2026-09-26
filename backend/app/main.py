@@ -5,12 +5,17 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.adjustments.routes import router as adjustments_router
 from app.auth.routes import router as auth_router
 from app.categories.routes import router as categories_router
 from app.core.config import get_settings
+from app.deliveries.routes import router as deliveries_router
+from app.inventory.routes import router as inventory_router
 from app.locations.routes import router as locations_router
 from app.products.routes import router as products_router
+from app.receipts.routes import router as receipts_router
 from app.reorder_rules.routes import router as reorder_rules_router
+from app.transfers.routes import router as transfers_router
 from app.units.routes import router as units_router
 from app.users.routes import router as users_router
 from app.warehouses.routes import router as warehouses_router
@@ -46,6 +51,9 @@ def create_app() -> FastAPI:
         locations_router,
         reorder_rules_router,
     ):
+        app.include_router(router, prefix=settings.API_PREFIX)
+    # Inventory operations & stock engine
+    for router in (inventory_router, receipts_router, deliveries_router, transfers_router, adjustments_router):
         app.include_router(router, prefix=settings.API_PREFIX)
     return app
 

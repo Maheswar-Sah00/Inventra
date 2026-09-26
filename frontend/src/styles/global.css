@@ -583,3 +583,79 @@ h3 {
     text-align: left;
   }
 }
+
+/* ---- Inventory operations ---- */
+.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.table th.num {
+  text-align: right;
+}
+
+.section-title {
+  margin: 1.75rem 0 0.75rem;
+}
+
+.text-danger {
+  color: var(--color-danger);
+}
+
+.field-hint.warning {
+  color: #b54708;
+}
+
+.status-draft {
+  background: var(--color-bg);
+  color: var(--color-muted);
+  border: 1px solid var(--color-border);
+}
+
+.status-waiting {
+  background: #fffaeb;
+  color: #b54708;
+}
+
+.status-ready {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+.status-done {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.status-canceled {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.lines-table select,
+.lines-table .qty-input {
+  font: inherit;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: inherit;
+}
+
+.lines-table select {
+  width: 100%;
+  min-width: 200px;
+}
+
+.lines-table .qty-input {
+  width: 8rem;
+  text-align: right;
+}
+
+.lines-table td {
+  vertical-align: top;
+}
+
+.form-card h2 {
+  margin-top: 0.5rem;
+}
