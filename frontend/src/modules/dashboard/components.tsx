@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 import { SelectField } from "../../components/ui/FormField";
+import { Icon, type IconName } from "../../components/ui/Icon";
 import { formatDateTime, formatQuantity } from "../inventory/operations";
 import type { StockMovement } from "../inventory/types";
 import { ALL, categoriesApi, locationsApi, warehousesApi } from "../master-data/api";
@@ -43,6 +44,8 @@ export function KpiCard({
   to,
   loading,
   disabledReason,
+  icon,
+  hero = false,
 }: {
   label: string;
   value: ReactNode;
@@ -50,10 +53,21 @@ export function KpiCard({
   to?: string;
   loading?: boolean;
   disabledReason?: string;
+  icon?: IconName;
+  /** The dark lead card of the KPI row. */
+  hero?: boolean;
 }) {
+  const linked = Boolean(to && !loading && !disabledReason);
   const body = (
     <>
-      <span className="kpi-label">{label}</span>
+      <span className="kpi-top">
+        <span className="kpi-label">{label}</span>
+        {(linked || icon) && (
+          <span className="kpi-icon">
+            <Icon name={linked ? "arrowUpRight" : icon!} size={16} />
+          </span>
+        )}
+      </span>
       {loading ? (
         <span className="kpi-value kpi-loading" aria-live="polite">
           Loading…
@@ -63,15 +77,128 @@ export function KpiCard({
       ) : (
         <span className="kpi-value">{value}</span>
       )}
-      <span className="kpi-detail">{disabledReason ?? detail}</span>
+      <span className="kpi-detail">
+        {icon && !disabledReason && <Icon name={icon} size={14} />}
+        {disabledReason ?? detail}
+      </span>
     </>
   );
-  return to && !loading && !disabledReason ? (
-    <Link to={to} className="kpi-card kpi-link">
+  const className = `kpi-card${hero ? " kpi-hero surface-dark" : ""}`;
+  return linked ? (
+    <Link to={to!} className={`${className} kpi-link`}>
       {body}
     </Link>
   ) : (
-    <div className="kpi-card">{body}</div>
+    <div className={className}>{body}</div>
+  );
+}
+
+/** Two-letter tile standing in for a product image. */
+export function Thumb({ name }: { name: string }) {
+  const letters = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+  return (
+    <span className="thumb" aria-hidden="true">
+      {letters || "?"}
+    </span>
+  );
+}
+
+/** Rounds `max` up to 4 even steps of 1, 2, 2.5 or 5 x 10^n so the axis reads cleanly. */
+function niceScale(max: number) {
+  if (max <= 4) return { top: 4, step: 1 };
+  const raw = max / 4;
+  const magnitude = 10 ** Math.floor(Math.log10(raw));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * magnitude).find((candidate) => candidate >= raw)!;
+  return { top: step * 4, step };
+}
+
+export type ChartColumn = {
+  label: string;
+  /** Stacked from the bottom up; each segment key has a legend entry. */
+  segments: { key: string; value: number }[];
+  highlighted?: boolean;
+};
+
+/**
+ * Stacked bar chart. Decorative: the same numbers are always shown in a table next to it,
+ * so it is hidden from assistive tech.
+ */
+export function BarChart({ columns, legend }: { columns: ChartColumn[]; legend: { key: string; label: string }[] }) {
+  const totals = columns.map((c) => c.segments.reduce((sum, segment) => sum + segment.value, 0));
+  const { top, step } = niceScale(Math.max(0, ...totals));
+  const ticks = [0, 1, 2, 3, 4].map((i) => i * step);
+  const columnsTemplate = { gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` };
+  return (
+    <div className="chart" aria-hidden="true">
+      <div className="chart-body">
+        <div className="chart-axis">
+          {ticks.map((tick) => (
+            <span key={tick} style={{ bottom: `${(tick / top) * 100}%` }}>
+              {Number.isInteger(tick) ? tick : tick.toFixed(1)}
+            </span>
+          ))}
+        </div>
+        <div className="chart-plot" style={columnsTemplate}>
+          {ticks.map((tick) => (
+            <span key={tick} className="chart-gridline" style={{ bottom: `${(tick / top) * 100}%` }} />
+          ))}
+          {columns.map((column, index) => (
+            <div key={column.label} className={`chart-col${column.highlighted ? " highlighted" : ""}`}>
+              <div
+                className={`chart-bar${totals[index] === 0 ? " empty" : ""}`}
+                style={totals[index] ? { height: `${(totals[index] / top) * 100}%` } : undefined}
+                title={`${column.label}: ${totals[index]}`}
+              >
+                {column.segments
+                  .filter((segment) => segment.value > 0)
+                  .map((segment) => (
+                    <span key={segment.key} className={`chart-seg seg-${segment.key}`} style={{ flexGrow: segment.value }} />
+                  ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="chart-labels" style={columnsTemplate}>
+        {columns.map((column) => (
+          <span key={column.label} className={column.highlighted ? "highlighted" : undefined}>
+            {column.label}
+          </span>
+        ))}
+      </div>
+      <div className="chart-legend">
+        {legend.map((item) => (
+          <span key={item.key}>
+            <i className={`seg-${item.key}`} />
+            {item.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Ring showing a percentage, with the number printed in the middle. */
+export function Donut({ percent, label }: { percent: number | null; label: string }) {
+  const value = percent === null ? 0 : Math.max(0, Math.min(100, percent));
+  return (
+    <span className="donut" role="img" aria-label={percent === null ? `${label}: no data` : `${label}: ${Math.round(value)}%`}>
+      <svg viewBox="0 0 36 36" width="76" height="76">
+        <circle className="donut-track" cx="18" cy="18" r="15.915" />
+        {value > 0 && (
+          <circle className="donut-value" cx="18" cy="18" r="15.915" strokeDasharray={`${value} ${100 - value}`} strokeDashoffset="25" />
+        )}
+      </svg>
+      <span className="donut-label" aria-hidden="true">
+        {percent === null ? "—" : `${Math.round(value)}%`}
+      </span>
+    </span>
   );
 }
 
@@ -172,7 +299,7 @@ function signedQuantity(value: number, unit: string) {
 /** Stock ledger rows (Ravi's stock_movements), newest first. */
 export function MovementTable({ movements, compact = false }: { movements: StockMovement[]; compact?: boolean }) {
   return (
-    <div className="table-wrap">
+    <div className={compact ? "table-wrap flush" : "table-wrap"}>
       <table className="table">
         <thead>
           <tr>
@@ -191,13 +318,22 @@ export function MovementTable({ movements, compact = false }: { movements: Stock
             const path = REFERENCE_PATHS[m.reference_type];
             return (
               <tr key={m.id}>
-                <td className="small">{formatDateTime(m.created_at)}</td>
-                <td>{MOVEMENT_LABELS[m.movement_type] ?? m.movement_type}</td>
+                <td className="small muted nowrap">{formatDateTime(m.created_at)}</td>
                 <td>
-                  <Link to={`/products/${m.product_id}`}>{m.product.name}</Link>{" "}
-                  <span className="muted mono small">{m.product.sku}</span>
+                  <span className={`type-pill type-${m.movement_type.toLowerCase().replace(/_/g, "-")}`}>
+                    {MOVEMENT_LABELS[m.movement_type] ?? m.movement_type}
+                  </span>
                 </td>
-                <td className={`num ${m.quantity < 0 ? "text-danger" : ""}`}>
+                <td>
+                  <span className="product-cell">
+                    <Thumb name={m.product.name} />
+                    <span className="product-cell-text">
+                      <Link to={`/products/${m.product_id}`}>{m.product.name}</Link>
+                      <span className="muted mono small">{m.product.sku}</span>
+                    </span>
+                  </span>
+                </td>
+                <td className={`num qty ${m.quantity < 0 ? "qty-out" : m.quantity > 0 ? "qty-in" : ""}`}>
                   {signedQuantity(m.quantity, m.product.unit_of_measure.symbol)}
                 </td>
                 <td>{m.source_location ? locationLabel(m.source_location) : "—"}</td>

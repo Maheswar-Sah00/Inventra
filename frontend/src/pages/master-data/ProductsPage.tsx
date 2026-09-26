@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { Alert } from "../../components/ui/Alert";
 import { Button } from "../../components/ui/Button";
@@ -17,7 +17,10 @@ export function ProductsPage() {
   const { hasRole } = useAuth();
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [search, setSearch] = useState("");
+  // The top bar search sends people here with ?q=...
+  const [searchParams] = useSearchParams();
+  const urlQuery = searchParams.get("q") ?? "";
+  const [search, setSearch] = useState(urlQuery);
   const [categoryId, setCategoryId] = useState("");
   const [status, setStatus] = useState<StatusFilter>("active");
   const [offset, setOffset] = useState(0);
@@ -30,6 +33,11 @@ export function ProductsPage() {
     limit: 20,
     offset,
   });
+
+  useEffect(() => {
+    setSearch(urlQuery);
+    setOffset(0);
+  }, [urlQuery]);
 
   useEffect(() => {
     categoriesApi
