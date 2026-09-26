@@ -1,4 +1,5 @@
-"""Real concurrent requests against a file-backed database (separate connections, separate threads).
+"""Real concurrent requests (separate connections, separate threads) against a SQLite file,
+or against TEST_DATABASE_URL when set.
 
 PostgreSQL relies on the same code path with row locks (SELECT ... FOR UPDATE); SQLite serialises
 writers with its database lock. Either way the status compare-and-set plus locked stock check must let
@@ -26,10 +27,15 @@ from app.receipts.schemas import ReceiptCreate
 from app.units.models import UnitOfMeasure
 from app.users.models import User, UserRole
 from app.warehouses.models import Warehouse
+from tests.conftest import TEST_DATABASE_URL, shared_test_engine
 
 
 @pytest.fixture
 def db_factory(tmp_path):
+    # With TEST_DATABASE_URL (e.g. PostgreSQL) this exercises real row locks; otherwise a SQLite file.
+    if TEST_DATABASE_URL:
+        yield sessionmaker(bind=shared_test_engine(), autoflush=False, expire_on_commit=False)
+        return
     engine = create_engine(
         f"sqlite:///{(tmp_path / 'concurrency.db').as_posix()}",
         connect_args={"check_same_thread": False, "timeout": 30},

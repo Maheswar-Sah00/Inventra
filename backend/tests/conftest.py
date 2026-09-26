@@ -9,7 +9,7 @@ os.environ["EMAIL_BACKEND"] = "console"
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
-from sqlalchemy import create_engine  # noqa: E402
+from sqlalchemy import create_engine, text  # noqa: E402
 from sqlalchemy.orm import sessionmaker  # noqa: E402
 from sqlalchemy.pool import StaticPool  # noqa: E402
 
@@ -36,8 +36,31 @@ class FakeEmailSender:
         return match.group(1)
 
 
+# Optional: run the suite against a real database, e.g.
+#   TEST_DATABASE_URL=postgresql+psycopg://user:pass@localhost:5432/stocksense_test python -m pytest
+# The database is wiped. Without it, each test gets a fresh in-memory SQLite database.
+TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL")
+_shared_engine = None
+
+
+def shared_test_engine():
+    """Engine for TEST_DATABASE_URL, with tables created once per run and emptied before each use."""
+    global _shared_engine
+    if _shared_engine is None:
+        _shared_engine = create_engine(TEST_DATABASE_URL, pool_pre_ping=True)
+        Base.metadata.drop_all(_shared_engine)
+        Base.metadata.create_all(_shared_engine)
+    tables = ", ".join(table.name for table in Base.metadata.sorted_tables)
+    with _shared_engine.begin() as connection:
+        connection.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
+    return _shared_engine
+
+
 @pytest.fixture
 def db_session_factory():
+    if TEST_DATABASE_URL:
+        yield sessionmaker(bind=shared_test_engine(), autoflush=False, expire_on_commit=False)
+        return
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     Base.metadata.create_all(engine)
     yield sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
